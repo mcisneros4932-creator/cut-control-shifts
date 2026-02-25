@@ -9,7 +9,7 @@
   <style>
     :root{
       --bg1:#070b14; --bg2:#0b1220;
-      --card:#0f172a; --line:rgba(255,255,255,.10);
+      --line:rgba(255,255,255,.10);
       --fg:#eaf0ff; --muted:rgba(234,240,255,.72);
       --accent:#7c3aed; --accent2:#22c55e; --accent3:#06b6d4;
       --warn:#f59e0b; --danger:#fb7185;
@@ -27,10 +27,7 @@
         linear-gradient(180deg, var(--bg1), var(--bg2));
       min-height:100vh;
     }
-    header{
-      display:flex; align-items:flex-start; justify-content:space-between;
-      gap:12px; margin-bottom:14px; flex-wrap:wrap;
-    }
+    header{display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:14px; flex-wrap:wrap;}
     h1{font-size:20px; margin:0; letter-spacing:.2px}
     .sub{color:var(--muted); font-size:12px; margin-top:6px; line-height:1.35}
     .glowLine{
@@ -82,10 +79,7 @@
     }
     .kpi .big{font-size:16px; font-weight:1000}
     .kpi .small{font-size:11px; color:var(--muted); margin-top:2px}
-    .sectionTitle{
-      display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
-      margin-bottom:6px;
-    }
+    .sectionTitle{display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:6px;}
     .sectionTitle .left{display:flex; align-items:center; gap:10px}
     .badge{
       display:inline-flex; align-items:center; gap:8px;
@@ -173,13 +167,13 @@
 <script>
 /* =============================
    FINAL CUT CONTROL (Miguel)
-   UPDATE: Dayshift timing tightened ✅
-   - Days: 3:30 / 6:30 / 9:30 / 12:30 / 4:45-5:15 / 8:05 / 8:30-8:45
-   - Nights: same as before (1p / 2p / 3:15 / 7p / 1a / pre-sleep)
-   - Peptides = pre-bed protocol ✅
+   - Dayshift timing tightened ✅
+   - Nightshift option ✅
+   - Added missing common stack items ✅ (Core + Performance + Recovery/Gut)
+   - Peptides = pre-bed ✅
 ================================ */
 
-const LS_KEY = "final_cut_control_day_night_v2_tight_days";
+const LS_KEY = "final_cut_control_day_night_v3_more_supps";
 
 const DEFAULTS = {
   shift: "days",
@@ -272,9 +266,7 @@ function getPlan(shift, mode){
       },
       { time:"6:30–8:00 PM", title:(mode==="train"?"Training Block":"Recovery Block"),
         macros:null,
-        items:[
-          mk("d_block",mode==="train"?"Lift 6:30–8:00":"Walk + mobility 20–40 min","")
-        ]
+        items:[ mk("d_block",mode==="train"?"Lift 6:30–8:00":"Walk + mobility 20–40 min","") ]
       },
       { time:"8:05 PM", title:"Post / Dinner",
         macros:(mode==="train"?{p:55,c:15,f:18,cal:520}:{p:55,c:5,f:20,cal:480}),
@@ -295,7 +287,7 @@ function getPlan(shift, mode){
     ];
   }
 
-  // NIGHTS (keep your old flow)
+  // NIGHTS
   return [
     { time:"1:00 PM", title:"Wake / Pre-Workout",
       macros:{p:25,c:40,f:2,cal:280},
@@ -370,42 +362,68 @@ function getPrescriptions(shift){
   ];
 }
 
-/* ========= SUPPLEMENTS ========= */
+/* ========= SUPPLEMENTS =========
+   Expanded with common items you’ve mentioned in this project:
+   - Magnesium (for sleep/recovery)
+   - B-Complex
+   - Creatine
+   - L-Carnitine
+   - Nitric Oxide support (citrulline/arginine) + Taurine
+   - Beet powder (optional)
+   - Men’s health pack / multivitamin pack (optional)
+*/
 function getSupplements(shift){
   if(shift === "days"){
     return [
-      block("3:30 AM — Wake", [
+      block("3:30 AM — Wake (Core)", [
         mk("sup_lmnt_days","LMNT (1 pack)","Electrolytes + hydration"),
+        mk("sup_bcomplex_days","B-Complex (optional)","If you use it"),
+        mk("sup_multivit_days","Men’s Health Pack / Multi pack (optional)","If you take one"),
         mk("sup_glucosamine_days","Glucosamine","Joint support")
       ]),
-      block("6:30 AM — With meal", [
-        mk("sup_d3k2_days","Vitamin D3 + K2","With food is fine")
+      block("6:30 AM — With meal (Core)", [
+        mk("sup_d3k2_days","Vitamin D3 + K2","With food is fine"),
+        mk("sup_creatine_days","Creatine (optional)","If you run it daily")
       ]),
-      block("Pre-workout (4:45–5:15 PM)", [
-        mk("sup_iso_pre_days","Protein (ISO100)","Easy pre training protein")
+      block("Pre-workout (4:45–5:15 PM) — Performance", [
+        mk("sup_iso_pre_days","Protein (ISO100)","Easy pre training protein"),
+        mk("sup_carnitine_days","L-Carnitine (optional)","If you use it"),
+        mk("sup_no_days","Citrulline/Arginine (optional)","Pump / performance"),
+        mk("sup_taurine_days","Taurine (optional)","If you use it"),
+        mk("sup_beet_days","Beet powder/juice (optional)","If you use it")
       ]),
-      block("Pre-bed (8:30–8:45 PM) — Protocol", [
+      block("Pre-bed (8:30–8:45 PM) — Protocol / Recovery", [
         mk("sup_pep_days","Peptides (AOD / CJC / Ipam combo)","Protocol: pre-bed"),
         mk("sup_glutathione_days","Glutathione","Added to your stack"),
+        mk("sup_mag_days","Magnesium (optional)","Recovery/sleep support"),
         mk("sup_casein_days","Optional: Casein","Only if you need it for hunger/protein")
       ])
     ];
   }
+
   return [
-    block("1:00 PM — Wake", [
+    block("1:00 PM — Wake (Core)", [
       mk("sup_lmnt_nights","LMNT (1 pack)","Electrolytes + hydration"),
+      mk("sup_bcomplex_nights","B-Complex (optional)","If you use it"),
+      mk("sup_multivit_nights","Men’s Health Pack / Multi pack (optional)","If you take one"),
       mk("sup_glucosamine_nights","Glucosamine","Joint support")
     ]),
-    block("With first meal", [
-      mk("sup_d3k2_nights","Vitamin D3 + K2","With food is fine")
+    block("With first meal (Core)", [
+      mk("sup_d3k2_nights","Vitamin D3 + K2","With food is fine"),
+      mk("sup_creatine_nights","Creatine (optional)","If you run it daily")
     ]),
-    block("Pre / Post training window", [
+    block("Pre / Post training window — Performance", [
       mk("sup_iso_nights","Protein (ISO100)",""),
+      mk("sup_carnitine_nights","L-Carnitine (optional)","If you use it"),
+      mk("sup_no_nights","Citrulline/Arginine (optional)","Pump / performance"),
+      mk("sup_taurine_nights","Taurine (optional)","If you use it"),
+      mk("sup_beet_nights","Beet powder/juice (optional)","If you use it"),
       mk("sup_casein_nights","Optional: Casein","Only if you need it for hunger/protein")
     ]),
-    block("Pre-sleep (Protocol)", [
+    block("Pre-sleep — Protocol / Recovery", [
       mk("sup_pep_nights","Peptides (AOD / CJC / Ipam combo)","Protocol: pre-bed"),
-      mk("sup_glutathione_nights","Glutathione","Added to your stack")
+      mk("sup_glutathione_nights","Glutathione","Added to your stack"),
+      mk("sup_mag_nights","Magnesium (optional)","Recovery/sleep support")
     ])
   ];
 }
@@ -544,7 +562,7 @@ function renderSupps(root){
       el("div","left", badge("sup","Stack"), strong("Supplements")),
       el("div","stamp","Peptides = pre-bed")
     ),
-    el("div","sub","LMNT • D3+K2 • Glucosamine • Glutathione • Protein • Peptides (AOD/CJC/Ipam) pre-bed")
+    el("div","sub","Core + Performance + Recovery. (Optional items are labeled optional.)")
   ));
   root.appendChild(top);
 
@@ -679,21 +697,3 @@ function inputBox(title, key, value, placeholder){
   return box;
 }
 function textBox(title, key, value, placeholder){
-  const box = el("div","box");
-  box.appendChild(el("label",null,title));
-  const ta = document.createElement("textarea");
-  ta.value = value || "";
-  ta.placeholder = placeholder || "";
-  ta.oninput = (e) => { state.tracker[key] = e.target.value; saveState(); };
-  box.appendChild(ta);
-  return box;
-}
-
-/* ========= BOOT ========= */
-maybeDailyReset();
-syncHeader();
-if(!state.tab) state.tab="today";
-render();
-</script>
-</body>
-</html>

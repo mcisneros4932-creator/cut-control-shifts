@@ -3,77 +3,154 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Cut Control v3 Elite</title>
+  <title>Final Cut — Dayshift</title>
   <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#000000" />
+  <meta name="theme-color" content="#0b1220" />
   <style>
     :root{
-      --bg:#fff; --fg:#000; --muted:#666; --card:#f7f7f7; --line:#e6e6e6; --good:#0a7a2f;
+      --bg1:#070b14;
+      --bg2:#0b1220;
+      --card:#0f172a;
+      --line:rgba(255,255,255,.10);
+      --fg:#eaf0ff;
+      --muted:rgba(234,240,255,.72);
+
+      --accent:#7c3aed;      /* purple */
+      --accent2:#22c55e;     /* green */
+      --accent3:#06b6d4;     /* cyan */
+      --warn:#f59e0b;        /* amber */
+      --danger:#fb7185;      /* rose */
+
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
     }
     *{box-sizing:border-box}
     body{
       margin:0; padding:18px;
       font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-      background:var(--bg); color:var(--fg);
+      color:var(--fg);
+      background:
+        radial-gradient(1200px 600px at 10% 0%, rgba(124,58,237,.22), transparent 55%),
+        radial-gradient(900px 500px at 90% 10%, rgba(6,182,212,.18), transparent 55%),
+        radial-gradient(900px 600px at 50% 100%, rgba(34,197,94,.12), transparent 60%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+      min-height:100vh;
     }
-    header{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px; flex-wrap:wrap}
+    header{
+      display:flex; align-items:flex-start; justify-content:space-between;
+      gap:12px; margin-bottom:14px; flex-wrap:wrap;
+    }
     h1{font-size:20px; margin:0; letter-spacing:.2px}
-    .sub{color:var(--muted); font-size:12px; margin-top:4px; line-height:1.35}
-    .pillrow{display:flex; gap:8px; flex-wrap:wrap}
-    .pill{
-      padding:10px 12px; border-radius:999px; border:1px solid var(--line);
-      background:#fff; color:#000; font-weight:800; font-size:13px;
-      cursor:pointer; user-select:none;
-    }
-    .pill.active{background:#000; color:#fff; border-color:#000}
+    .sub{color:var(--muted); font-size:12px; margin-top:6px; line-height:1.35}
     nav{display:flex; gap:8px; flex-wrap:wrap; margin:10px 0 14px}
     .tab{
-      padding:10px 12px; border-radius:12px; border:1px solid var(--line);
-      background:#fff; font-weight:900; font-size:13px; cursor:pointer;
+      padding:10px 12px; border-radius:14px; border:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+      font-weight:1000; font-size:13px; cursor:pointer;
+      box-shadow: 0 2px 10px rgba(0,0,0,.18);
+      transition:transform .06s ease, background .15s ease, border-color .15s ease;
     }
-    .tab.active{background:var(--card)}
+    .tab:active{transform:scale(.99)}
+    .tab.active{
+      background: linear-gradient(135deg, rgba(34,197,94,.30), rgba(6,182,212,.18));
+      border-color: rgba(255,255,255,.18);
+    }
     .card{
-      border:1px solid var(--line); background:var(--card);
-      padding:14px; border-radius:16px; margin-bottom:12px;
+      border:1px solid var(--line);
+      background: linear-gradient(180deg, rgba(15,23,42,.92), rgba(11,18,32,.92));
+      padding:14px;
+      border-radius:18px;
+      margin-bottom:12px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
     }
     .row{display:flex; align-items:flex-start; justify-content:space-between; gap:10px; flex-wrap:wrap}
     .stamp{font-size:11px; color:var(--muted)}
     .kpi{display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:10px; margin-top:10px}
-    .kpi > div{background:#fff; border:1px solid var(--line); border-radius:14px; padding:10px}
+    .kpi > div{
+      background:rgba(255,255,255,.03);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:10px;
+    }
     .kpi .big{font-size:16px; font-weight:1000}
     .kpi .small{font-size:11px; color:var(--muted); margin-top:2px}
-    .item{display:flex; align-items:flex-start; gap:10px; padding:8px 0; border-bottom:1px dashed rgba(0,0,0,.08)}
+    .item{display:flex; align-items:flex-start; gap:10px; padding:9px 0; border-bottom:1px dashed rgba(255,255,255,.10)}
     .item:last-child{border-bottom:none}
-    input[type="checkbox"]{width:18px; height:18px; margin-top:2px}
-    .label{font-weight:900; font-size:13px}
+    input[type="checkbox"]{
+      width:18px; height:18px; margin-top:2px;
+      accent-color: var(--accent2);
+    }
+    .label{font-weight:1000; font-size:13px}
     .meta{color:var(--muted); font-size:12px; margin-top:2px; line-height:1.35}
-    .doneTag{color:var(--good); font-weight:1000; font-size:11px; margin-left:6px}
+    .doneTag{color:var(--accent2); font-weight:1000; font-size:11px; margin-left:6px}
     .btnrow{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px}
     .btn{
-      padding:10px 12px; border-radius:12px; border:1px solid var(--line); background:#fff; font-weight:1000; cursor:pointer;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+      color:var(--fg);
+      font-weight:1000;
+      cursor:pointer;
+      box-shadow: 0 2px 10px rgba(0,0,0,.18);
+      transition:transform .06s ease, background .15s ease, border-color .15s ease;
     }
-    .btn.danger{border-color:#ffdddd}
+    .btn:active{transform:scale(.99)}
+    .btn.danger{
+      border-color: rgba(251,113,133,.35);
+      background: rgba(251,113,133,.08);
+    }
+    .badge{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:6px 10px; border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+      font-size:11px; font-weight:900; color:var(--muted);
+    }
+    .dot{width:8px; height:8px; border-radius:999px; background:var(--accent3)}
+    .dot.rx{background:var(--warn)}
+    .dot.sup{background:var(--accent2)}
+    .dot.today{background:var(--accent)}
+    .dot.track{background:var(--danger)}
     .inputs{display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px; margin-top:10px}
-    .inputs .box{background:#fff; border:1px solid var(--line); border-radius:14px; padding:10px}
-    .inputs label{display:block; font-size:11px; color:var(--muted); margin-bottom:6px; font-weight:900}
+    .inputs .box{
+      background:rgba(255,255,255,.03);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:10px;
+    }
+    .inputs label{display:block; font-size:11px; color:var(--muted); margin-bottom:6px; font-weight:1000}
     .inputs input, .inputs textarea{
-      width:100%; border:1px solid var(--line); border-radius:12px; padding:10px; font-weight:800;
-      font-size:13px; outline:none;
+      width:100%;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(0,0,0,.18);
+      color:var(--fg);
+      border-radius:14px;
+      padding:10px;
+      font-weight:900;
+      font-size:13px;
+      outline:none;
     }
     .inputs textarea{min-height:70px; resize:vertical}
+    .sectionTitle{
+      display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
+      margin-bottom:6px;
+    }
+    .sectionTitle .left{display:flex; align-items:center; gap:10px}
+    .glowLine{
+      height:2px; width:100%;
+      background: linear-gradient(90deg, rgba(124,58,237,.0), rgba(124,58,237,.6), rgba(6,182,212,.5), rgba(34,197,94,.4), rgba(34,197,94,.0));
+      border-radius:999px;
+      margin-top:10px;
+    }
   </style>
 </head>
 <body>
   <header>
     <div>
-      <h1>Cut Control v3 Elite</h1>
+      <h1>Final Cut — Dayshift</h1>
       <div class="sub" id="subtitle"></div>
-    </div>
-    <div class="pillrow">
-      <div class="pill" id="shiftDays" onclick="setShift('days')">Days</div>
-      <div class="pill" id="shiftNights" onclick="setShift('nights')">Nights</div>
-      <div class="pill" id="modeTrain" onclick="setMode('train')">Training</div>
-      <div class="pill" id="modeOff" onclick="setMode('off')">Off-Day</div>
+      <div class="glowLine"></div>
     </div>
   </header>
 
@@ -89,41 +166,38 @@
 
 <script>
 /* =============================
-   Cut Control v3 Elite (Miguel)
-   - Days/Nights toggle
-   - Training/Off toggle
-   - Separate PRESCRIPTIONS and SUPPLEMENTS tabs
-   - Checklists save automatically
+   FINAL CUT — DAYSHIFT (Miguel)
+   - Day shift schedule only
+   - Training assumed 6:30–8:00 PM
+   - Separate Rx + Supplements
+   - Peptides = PRE-BED protocol
    - Daily reset of checkmarks
 ================================ */
 
-const LS_KEY = "cut_control_v3_elite_state_v2";
+const LS_KEY = "final_cut_dayshift_state_v1";
 
 const DEFAULTS = {
-  shift: "days",
-  mode: "train",
   tab: "today",
   checks: {},
   tracker: { weight:"", bf:"", steps:"", sleep:"", training:"", notes:"" },
   lastResetDate: ""
 };
 
-const TARGETS = { cal: 1900, p: 215, c: 170, f: 50 }; // your cut target from prior plan
+const TARGETS = { cal: 1900, p: 215, c: 170, f: 50 };
 
-function structuredCloneSafe(obj){ return JSON.parse(JSON.stringify(obj)); }
-
+function clone(obj){ return JSON.parse(JSON.stringify(obj)); }
 function loadState(){
   try{
     const raw = localStorage.getItem(LS_KEY);
-    if(!raw) return structuredCloneSafe(DEFAULTS);
+    if(!raw) return clone(DEFAULTS);
     const parsed = JSON.parse(raw);
     return {
-      ...structuredCloneSafe(DEFAULTS),
+      ...clone(DEFAULTS),
       ...parsed,
       checks: {...(parsed.checks||{})},
-      tracker: {...structuredCloneSafe(DEFAULTS.tracker), ...(parsed.tracker||{})}
+      tracker: {...clone(DEFAULTS.tracker), ...(parsed.tracker||{})}
     };
-  }catch(e){ return structuredCloneSafe(DEFAULTS); }
+  }catch(e){ return clone(DEFAULTS); }
 }
 let state = loadState();
 function saveState(){ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
@@ -144,247 +218,142 @@ function maybeDailyReset(){
   }
 }
 
-/* ===== Data Builders ===== */
 function mk(id, label, meta){ return { id, label, meta }; }
 function block(title, items){ return { title, items }; }
 
-/* ===== TODAY PLAN ===== */
-function getPlan(shift, mode){
-  if(shift === "days"){
-    return [
-      {
-        time:"3:30 AM",
-        title:"Wake / Hydrate",
-        macros:{p:25,c:35,f:2,cal:260},
-        items:[
-          mk("t_wake_shake","ISO100 + banana","Fast protein + carbs"),
-          mk("t_wake_water","Water (start the day hydrated)","")
-        ]
-      },
-      {
-        time:"6:30 AM",
-        title:"Meal 2 (Work Fuel)",
-        macros:{p:55,c:45,f:8,cal:480},
-        items:[
-          mk("t_m2_pro","7–9 oz chicken / lean protein","Keep fat low"),
-          mk("t_m2_carb","1 cup cooked rice (or potato)","Stable energy"),
-          mk("t_m2_veg","Veg / salsa / hot sauce","Volume + fiber")
-        ]
-      },
-      {
-        time:"11:30 AM",
-        title:"Meal 3",
-        macros:{p:55,c:45,f:10,cal:500},
-        items:[
-          mk("t_m3_pro","Lean protein","Rotate chicken/fish/96-4"),
-          mk("t_m3_carb","Rice / oats / potato",""),
-          mk("t_m3_veg","Veg","Gut support")
-        ]
-      },
-      {
-        time:"5:45 PM",
-        title:"Pre-Workout",
-        macros:(mode==="train"?{p:25,c:30,f:2,cal:240}:{p:25,c:10,f:2,cal:160}),
-        items:[
-          mk("t_pre_pro","ISO100 (or small protein meal)",""),
-          mk("t_pre_carb",mode==="train"?"Add carbs (banana/oats/rice)":"Keep carbs light","Match the mode")
-        ]
-      },
-      {
-        time:"6:30–8:00 PM",
-        title:(mode==="train"?"Training Block":"Recovery Block"),
-        macros:null,
-        items:[
-          mk("t_block",mode==="train"?"Lift 6:30–8:00":"Walk + mobility 20–40 min",mode==="train"?"Get after it":"Keep the cut rolling")
-        ]
-      },
-      {
-        time:"8:05 PM",
-        title:"Dinner / Post",
-        macros:(mode==="train"?{p:55,c:15,f:18,cal:520}:{p:55,c:5,f:20,cal:480}),
-        items:[
-          mk("t_post_pro","Lean protein + veg","Anchor the day"),
-          mk("t_post_optional",mode==="train"?"Optional small carbs":"Skip/very small carbs","")
-        ]
-      },
-      {
-        time:"8:45 PM",
-        title:"Sleep",
-        macros:null,
-        items:[ mk("t_sleep","Lights out","Protect sleep = protect results") ]
-      }
-    ];
-  }
-
-  // Nights (kept same style you were running)
+/* ===== TODAY (DAYSHIFT) PLAN ===== */
+function getDayPlan(){
   return [
     {
-      time:"1:00 PM",
-      title:"Wake / Pre-Workout",
-      macros:{p:25,c:40,f:2,cal:280},
+      time:"3:30 AM",
+      title:"Wake / Hydrate",
+      macros:{p:25,c:35,f:2,cal:260},
       items:[
-        mk("n_wake_shake","ISO100 + banana",""),
-        mk("n_wake_water","Water","")
+        mk("t_wake_shake","ISO100 + banana","Fast protein + carbs"),
+        mk("t_wake_water","Water + electrolytes (optional AM LMNT)","If you sweat heavy at work")
       ]
     },
     {
-      time:"2:00 PM",
-      title:(mode==="train"?"Training":"Recovery"),
+      time:"6:30 AM",
+      title:"Meal 2 (Work Fuel)",
+      macros:{p:55,c:45,f:8,cal:480},
+      items:[
+        mk("t_m2_pro","7–9 oz chicken / lean protein","Keep fat low"),
+        mk("t_m2_carb","1 cup cooked rice (or potato)","Stable energy"),
+        mk("t_m2_veg","Veg / salsa / hot sauce","Volume + fiber")
+      ]
+    },
+    {
+      time:"11:30 AM",
+      title:"Meal 3",
+      macros:{p:55,c:45,f:10,cal:500},
+      items:[
+        mk("t_m3_pro","Lean protein","Rotate chicken/fish/96-4"),
+        mk("t_m3_carb","Rice / oats / potato",""),
+        mk("t_m3_veg","Veg","Gut support")
+      ]
+    },
+    {
+      time:"5:45 PM",
+      title:"Pre-Workout",
+      macros:{p:25,c:30,f:2,cal:240},
+      items:[
+        mk("t_pre_pro","ISO100 (or small protein meal)",""),
+        mk("t_pre_carb","Add carbs (banana/oats/rice)","Fuel the 6:30PM session")
+      ]
+    },
+    {
+      time:"6:30–8:00 PM",
+      title:"Training Block",
       macros:null,
-      items:[ mk("n_train",mode==="train"?"Lift":"Walk + mobility","") ]
+      items:[
+        mk("t_train","Lift 6:30–8:00","Get after it")
+      ]
     },
     {
-      time:"3:15 PM",
-      title:"Post",
-      macros:(mode==="train"?{p:40,c:50,f:5,cal:405}:{p:40,c:20,f:5,cal:285}),
-      items:[ mk("n_post","Protein + carbs (oats/rice)","Match the day") ]
+      time:"8:05 PM",
+      title:"Dinner / Post",
+      macros:{p:55,c:15,f:18,cal:520},
+      items:[
+        mk("t_post_pro","Lean protein + veg","Anchor the day"),
+        mk("t_post_optional","Optional small carbs","Only if needed")
+      ]
     },
     {
-      time:"7:00 PM",
-      title:"Meal",
-      macros:{p:60,c:45,f:15,cal:555},
-      items:[ mk("n_meal","Lean protein + rice + veg","") ]
-    },
-    {
-      time:"1:00 AM",
-      title:"Final Meal",
-      macros:{p:50,c:15,f:18,cal:470},
-      items:[ mk("n_last","Lean protein (option: casein)","") ]
-    },
-    {
-      time:"7:00 AM",
-      title:"Sleep",
+      time:"8:30–8:45 PM",
+      title:"Pre-bed Lock-in",
       macros:null,
-      items:[ mk("n_sleep","Lights out","") ]
+      items:[
+        mk("t_winddown","Wind down (screens low, cool room)","Protect sleep = protect results"),
+        mk("t_sleep","Lights out","Sleep target: 8:45 PM")
+      ]
     }
   ];
 }
 
-/* ===== PRESCRIPTIONS (Rx) =====
-   Your list:
-   - Zoloft 50 mg
-   - Lisinopril 20 mg
-   - Atorvastatin 40 mg
-   - Fenofibrate 145 mg
-   - Vascepa 4 g/day
-*/
-function getPrescriptions(shift){
-  if(shift === "days"){
-    return [
-      block("6:30 AM — With first real meal", [
-        mk("rx_feno_days","Fenofibrate 145 mg","Take as prescribed (often with food)"),
-        mk("rx_vascepa1_days","Vascepa (part 1 of daily total)","Total is 4 g/day — many split doses")
-      ]),
-      block("11:30 AM — Consistent time", [
-        mk("rx_lisin_days","Lisinopril 20 mg","Same time daily")
-      ]),
-      block("8:05 PM — Evening / Dinner", [
-        mk("rx_atorva_days","Atorvastatin 40 mg","Often taken in evening (follow your label)"),
-        mk("rx_vascepa2_days","Vascepa (part 2 of daily total)","Completes daily total")
-      ]),
-      block("8:30 PM — Pre-sleep", [
-        mk("rx_zoloft_days","Zoloft (sertraline) 50 mg","Take as prescribed (AM or PM depending on you)")
-      ])
-    ];
-  }
-
-  // nights
+/* ===== PRESCRIPTIONS (DAYSHIFT) ===== */
+function getDayPrescriptions(){
   return [
-    block("Post-wake / first meal window", [
-      mk("rx_feno_nights","Fenofibrate 145 mg","Take as prescribed (often with food)"),
-      mk("rx_vascepa1_nights","Vascepa (part 1 of daily total)","Total is 4 g/day — many split doses")
+    block("6:30 AM — With first real meal", [
+      mk("rx_feno","Fenofibrate 145 mg","Take as prescribed (often with food)"),
+      mk("rx_vascepa1","Vascepa (part 1 of daily total)","Total is 4 g/day — many split doses")
     ]),
-    block("Mid-shift (consistent time)", [
-      mk("rx_lisin_nights","Lisinopril 20 mg","Same time daily")
+    block("11:30 AM — Consistent time", [
+      mk("rx_lisin","Lisinopril 20 mg","Same time daily")
     ]),
-    block("Later meal / evening", [
-      mk("rx_atorva_nights","Atorvastatin 40 mg","Often taken in evening (follow your label)"),
-      mk("rx_vascepa2_nights","Vascepa (part 2 of daily total)","Completes daily total")
+    block("8:05 PM — Evening / Dinner", [
+      mk("rx_atorva","Atorvastatin 40 mg","Often taken in evening (follow your label)"),
+      mk("rx_vascepa2","Vascepa (part 2 of daily total)","Completes daily total")
     ]),
-    block("Pre-sleep", [
-      mk("rx_zoloft_nights","Zoloft (sertraline) 50 mg","Take as prescribed (AM or PM depending on you)")
+    block("Pre-bed (8:30–8:45 PM)", [
+      mk("rx_zoloft","Zoloft (sertraline) 50 mg","Take as prescribed (AM or PM depending on you)")
     ])
   ];
 }
 
-/* ===== SUPPLEMENTS =====
-   Your list:
-   - LMNT
-   - D3 + K2
-   - Glucosamine
-   - Glutathione
-   - Peptides (AOD / CJC / Ipam combo)
-   - Protein powder (ISO100 / casein optional)
-*/
-function getSupplements(shift){
-  if(shift === "days"){
-    return [
-      block("3:30 AM — Wake", [
-        mk("sup_lmnt_days","LMNT (1 pack)","Electrolytes + hydration"),
-        mk("sup_pep_days","Peptides (AOD / CJC / Ipam combo)","If this matches your protocol timing"),
-        mk("sup_glucosamine_days","Glucosamine","Joint support")
-      ]),
-      block("6:30 AM — With meal", [
-        mk("sup_d3k2_days","Vitamin D3 + K2","With food is fine")
-      ]),
-      block("Pre-workout (5:45 PM)", [
-        mk("sup_iso_pre_days","Protein (ISO100)","Easy pre training protein")
-      ]),
-      block("Post / Evening (8:05–8:30 PM)", [
-        mk("sup_glutathione_days","Glutathione","Added to your stack"),
-        mk("sup_casein_days","Optional: Casein","Only if you need it for hunger/protein")
-      ])
-    ];
-  }
-
-  // nights
+/* ===== SUPPLEMENTS (DAYSHIFT) — Peptides PRE-BED ===== */
+function getDaySupplements(){
   return [
-    block("1:00 PM — Wake", [
-      mk("sup_lmnt_nights","LMNT (1 pack)","Electrolytes + hydration"),
-      mk("sup_pep_nights","Peptides (AOD / CJC / Ipam combo)","If this matches your protocol timing"),
-      mk("sup_glucosamine_nights","Glucosamine","Joint support")
+    block("3:30 AM — Wake", [
+      mk("sup_lmnt","LMNT (1 pack)","Electrolytes + hydration"),
+      mk("sup_glucosamine","Glucosamine","Joint support")
     ]),
-    block("With first meal", [
-      mk("sup_d3k2_nights","Vitamin D3 + K2","With food is fine")
+    block("6:30 AM — With meal", [
+      mk("sup_d3k2","Vitamin D3 + K2","With food is fine")
     ]),
-    block("Pre / Post training window", [
-      mk("sup_iso_nights","Protein (ISO100)",""),
-      mk("sup_casein_nights","Optional: Casein","Only if you need it for hunger/protein")
+    block("Pre-workout (5:45 PM)", [
+      mk("sup_iso","Protein (ISO100)","Easy pre training protein")
     ]),
-    block("Pre-sleep", [
-      mk("sup_glutathione_nights","Glutathione","Added to your stack")
+    block("Pre-bed (8:30–8:45 PM) — Protocol", [
+      mk("sup_peptides","Peptides (AOD / CJC / Ipam combo)","Protocol: pre-bed"),
+      mk("sup_glutathione","Glutathione","Added to your stack"),
+      mk("sup_casein","Optional: Casein","Only if you need it for hunger/protein")
     ])
   ];
 }
 
-/* ===== UI / State ===== */
-function setShift(shift){ state.shift = shift; saveState(); syncHeader(); render(); }
-function setMode(mode){ state.mode = mode; saveState(); syncHeader(); render(); }
+/* ===== State / UI ===== */
 function setTab(tab){ state.tab = tab; saveState(); render(); }
 function checked(id){ return !!state.checks[id]; }
 function toggleCheck(id){ state.checks[id] = !state.checks[id]; saveState(); render(); }
 function clearAllChecks(){ state.checks = {}; saveState(); render(); }
 
 function syncHeader(){
-  document.getElementById("shiftDays").classList.toggle("active", state.shift==="days");
-  document.getElementById("shiftNights").classList.toggle("active", state.shift==="nights");
-  document.getElementById("modeTrain").classList.toggle("active", state.mode==="train");
-  document.getElementById("modeOff").classList.toggle("active", state.mode==="off");
   document.getElementById("subtitle").textContent =
-    `${state.shift.toUpperCase()} • ${state.mode === "train" ? "TRAINING DAY" : "OFF DAY"} • Target ${TARGETS.cal} kcal | ${TARGETS.p}P / ${TARGETS.c}C / ${TARGETS.f}F`;
+    `Dayshift • Training 6:30–8:00 PM • Target ${TARGETS.cal} kcal | ${TARGETS.p}P / ${TARGETS.c}C / ${TARGETS.f}F • Peptides pre-bed`;
 }
 
-function countChecks(items){
-  let total=0, done=0;
-  for(const it of items){ total++; if(checked(it.id)) done++; }
-  return {total, done};
-}
 function sumMacros(plan){
   let p=0,c=0,f=0,cal=0;
   for(const b of plan){
     if(b.macros){ p+=b.macros.p||0; c+=b.macros.c||0; f+=b.macros.f||0; cal+=b.macros.cal||0; }
   }
   return {p,c,f,cal};
+}
+function countChecks(items){
+  let total=0, done=0;
+  for(const it of items){ total++; if(checked(it.id)) done++; }
+  return {total, done};
 }
 
 /* ===== Renderers ===== */
@@ -406,22 +375,24 @@ function render(){
 }
 
 function renderToday(root){
-  const plan = getPlan(state.shift, state.mode);
+  const plan = getDayPlan();
   const allItems = plan.flatMap(b => b.items || []);
   const prog = countChecks(allItems);
 
   const top = el("div","card");
   top.appendChild(el("div","row",
     el("div",null,
-      el("div",null,strong("Today Checklist")),
-      el("div","sub","Tap items. Saves automatically. Checkmarks reset daily.")
-    ),
-    el("div","stamp",`Reset daily • ${todayISO()}`)
+      el("div","sectionTitle",
+        el("div","left", badge("today","Today"), strong("Checklist")),
+        el("div","stamp",`Reset daily • ${todayISO()}`)
+      ),
+      el("div","sub","Tap items. Saves automatically.")
+    )
   ));
 
   const k = el("div","kpi");
   k.appendChild(kpiBox(`${prog.done}/${prog.total}`,"Tasks done"));
-  k.appendChild(kpiBox(`${state.shift==="days" ? "6:30 PM" : "2:00 PM"}`,"Training time"));
+  k.appendChild(kpiBox("6:30 PM","Training time"));
   k.appendChild(kpiBox(`${TARGETS.p}P / ${TARGETS.c}C / ${TARGETS.f}F`,"Daily target"));
   top.appendChild(k);
 
@@ -434,8 +405,10 @@ function renderToday(root){
   for(const b of plan){
     const card = el("div","card");
     card.appendChild(el("div",null,
-      el("div",null,strong(`${b.time} — ${b.title}`)),
-      b.macros ? el("div","sub",`${b.macros.cal} kcal • ${b.macros.p}P / ${b.macros.c}C / ${b.macros.f}F`) : el("div","sub","")
+      el("div","sectionTitle",
+        el("div","left", badge("today", b.time), strong(b.title)),
+        b.macros ? el("div","stamp",`${b.macros.cal} kcal • ${b.macros.p}P / ${b.macros.c}C / ${b.macros.f}F`) : el("div","stamp","")
+      )
     ));
     for(const it of b.items){
       card.appendChild(checkRow(it.id, it.label, it.meta));
@@ -445,18 +418,24 @@ function renderToday(root){
 }
 
 function renderRx(root){
-  const blocks = getPrescriptions(state.shift);
+  const blocks = getDayPrescriptions();
 
   const top = el("div","card");
   top.appendChild(el("div",null,
-    el("div",null,strong("Prescriptions (Rx)")),
-    el("div","sub","Checklist for consistency. Always follow your prescription label/provider instructions if different.")
+    el("div","sectionTitle",
+      el("div","left", badge("rx","Rx"), strong("Prescriptions")),
+      el("div","stamp","Follow your label if different")
+    ),
+    el("div","sub","Zoloft 50mg • Lisinopril 20mg • Atorvastatin 40mg • Fenofibrate 145mg • Vascepa 4g/day")
   ));
   root.appendChild(top);
 
   for(const b of blocks){
     const card = el("div","card");
-    card.appendChild(el("div",null,strong(b.title)));
+    card.appendChild(el("div","sectionTitle",
+      el("div","left", badge("rx", b.title), strong("")),
+      el("div","stamp","")
+    ));
     for(const it of b.items){
       card.appendChild(checkRow(it.id, it.label, it.meta));
     }
@@ -465,18 +444,24 @@ function renderRx(root){
 }
 
 function renderSupps(root){
-  const blocks = getSupplements(state.shift);
+  const blocks = getDaySupplements();
 
   const top = el("div","card");
   top.appendChild(el("div",null,
-    el("div",null,strong("Supplements")),
-    el("div","sub","This is your current stack list based on what you told me (LMNT, D3+K2, glucosamine, glutathione, peptides, protein).")
+    el("div","sectionTitle",
+      el("div","left", badge("sup","Stack"), strong("Supplements")),
+      el("div","stamp","Peptides = pre-bed")
+    ),
+    el("div","sub","LMNT • D3+K2 • Glucosamine • Glutathione • Protein • Peptides (AOD/CJC/Ipam) pre-bed")
   ));
   root.appendChild(top);
 
   for(const b of blocks){
     const card = el("div","card");
-    card.appendChild(el("div",null,strong(b.title)));
+    card.appendChild(el("div","sectionTitle",
+      el("div","left", badge("sup", b.title), strong("")),
+      el("div","stamp","")
+    ));
     for(const it of b.items){
       card.appendChild(checkRow(it.id, it.label, it.meta));
     }
@@ -485,17 +470,15 @@ function renderSupps(root){
 }
 
 function renderMacros(root){
-  const plan = getPlan(state.shift, state.mode);
+  const plan = getDayPlan();
   const sums = sumMacros(plan);
 
   const card = el("div","card");
-  card.appendChild(el("div","row",
-    el("div",null,
-      el("div",null,strong("Macro Map")),
-      el("div","sub","Planned macros from Today tab blocks. Use it as a guide, then log exacts in MyFitnessPal.")
-    ),
-    el("div","stamp",`${state.shift.toUpperCase()} • ${state.mode==="train"?"TRAIN":"OFF"}`)
+  card.appendChild(el("div","sectionTitle",
+    el("div","left", badge("today","Macros"), strong("Macro Map")),
+    el("div","stamp","Dayshift")
   ));
+  card.appendChild(el("div","sub","Planned macros from Today blocks. Log exact food in MyFitnessPal for precision."));
 
   const k1 = el("div","kpi");
   k1.appendChild(kpiBox(`${TARGETS.cal}`,"Target kcal"));
@@ -510,23 +493,17 @@ function renderMacros(root){
   card.appendChild(k2);
 
   root.appendChild(card);
-
-  for(const b of plan){
-    const c = el("div","card");
-    c.appendChild(el("div",null,strong(`${b.time} — ${b.title}`)));
-    c.appendChild(el("div","sub", b.macros ? `${b.macros.cal} kcal • ${b.macros.p}P / ${b.macros.c}C / ${b.macros.f}F` : "No macros (block)"));
-    root.appendChild(c);
-  }
 }
 
 function renderTracker(root){
   const t = state.tracker;
 
   const card = el("div","card");
-  card.appendChild(el("div",null,
-    el("div",null,strong("Progress Tracker")),
-    el("div","sub","Quick daily log (saves on-device).")
+  card.appendChild(el("div","sectionTitle",
+    el("div","left", badge("track","Log"), strong("Tracker")),
+    el("div","stamp","Saves on-device")
   ));
+  card.appendChild(el("div","sub","Quick daily log: weight, BF%, steps, sleep, training, notes."));
 
   const inputs = el("div","inputs");
   inputs.appendChild(inputBox("Weight (lbs)","weight",t.weight,"e.g. 187.4"));
@@ -560,6 +537,15 @@ function strong(text){
   s.style.fontWeight = "1000";
   s.textContent = text;
   return s;
+}
+function badge(type, text){
+  const b = document.createElement("span");
+  b.className = "badge";
+  const d = document.createElement("span");
+  d.className = "dot " + (type || "");
+  b.appendChild(d);
+  b.appendChild(document.createTextNode(text));
+  return b;
 }
 function btn(text, onClick, variant){
   const b = document.createElement("button");

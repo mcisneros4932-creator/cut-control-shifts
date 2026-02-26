@@ -1,703 +1,419 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Final Cut Control — Day & Night</title>
-  <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#0b1220" />
+  <title>Cut Control</title>
+  <meta name="theme-color" content="#0b0b0b" />
   <style>
     :root{
-      --bg1:#070b14; --bg2:#0b1220;
-      --card:#0f172a; --line:rgba(255,255,255,.10);
-      --fg:#eaf0ff; --muted:rgba(234,240,255,.72);
-      --accent:#7c3aed; --accent2:#22c55e; --accent3:#06b6d4;
-      --warn:#f59e0b; --danger:#fb7185;
-      --shadow:0 10px 30px rgba(0,0,0,.35);
+      --bg:#0b0b0b; --card:#141414; --text:#fff; --muted:#bdbdbd;
+      --border:rgba(255,255,255,.10); --accent:#40ff9a;
     }
     *{box-sizing:border-box}
-    body{
-      margin:0; padding:18px;
-      font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-      color:var(--fg);
-      background:
-        radial-gradient(1200px 600px at 10% 0%, rgba(124,58,237,.22), transparent 55%),
-        radial-gradient(900px 500px at 90% 10%, rgba(6,182,212,.18), transparent 55%),
-        radial-gradient(900px 600px at 50% 100%, rgba(34,197,94,.12), transparent 60%),
-        linear-gradient(180deg, var(--bg1), var(--bg2));
-      min-height:100vh;
-    }
-    header{display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:14px;}
-    h1{font-size:20px; margin:0; letter-spacing:.2px}
-    .sub{color:var(--muted); font-size:12px; margin-top:6px; line-height:1.35}
-    .glowLine{
-      height:2px; width:100%;
-      background:linear-gradient(90deg, rgba(124,58,237,0), rgba(124,58,237,.65), rgba(6,182,212,.55), rgba(34,197,94,.45), rgba(34,197,94,0));
-      border-radius:999px; margin-top:10px;
-    }
-    .pillrow{display:flex; gap:8px; flex-wrap:wrap; align-items:flex-start}
-    .pill{
-      padding:10px 12px; border-radius:999px; border:1px solid var(--line);
-      background:rgba(255,255,255,.04); color:var(--fg);
-      font-weight:1000; font-size:13px; cursor:pointer; user-select:none;
-      box-shadow:0 2px 10px rgba(0,0,0,.18);
-      transition:transform .06s ease, background .15s ease, border-color .15s ease;
-    }
-    .pill:active{transform:scale(.98)}
-    .pill.active{
-      background:linear-gradient(135deg, rgba(124,58,237,.95), rgba(6,182,212,.85));
-      border-color:rgba(255,255,255,.18);
-    }
-    nav{display:flex; gap:8px; flex-wrap:wrap; margin:10px 0 14px}
-    .tab{
-      padding:10px 12px; border-radius:14px; border:1px solid var(--line);
-      background:rgba(255,255,255,.03);
-      font-weight:1000; font-size:13px; cursor:pointer;
-      box-shadow:0 2px 10px rgba(0,0,0,.18);
-      transition:transform .06s ease, background .15s ease, border-color .15s ease;
-    }
-    .tab:active{transform:scale(.99)}
-    .tab.active{
-      background:linear-gradient(135deg, rgba(34,197,94,.30), rgba(6,182,212,.18));
-      border-color:rgba(255,255,255,.18);
-    }
-    .card{
-      border:1px solid var(--line);
-      background:linear-gradient(180deg, rgba(15,23,42,.92), rgba(11,18,32,.92));
-      padding:14px; border-radius:18px; margin-bottom:12px;
-      box-shadow:var(--shadow); backdrop-filter:blur(8px);
-    }
-    .row{display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; align-items:flex-start}
-    .stamp{font-size:11px; color:var(--muted)}
-    .kpi{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:10px; margin-top:10px}
-    .kpi>div{
-      background:rgba(255,255,255,.03); border:1px solid var(--line);
-      border-radius:16px; padding:10px;
-    }
-    .kpi .big{font-size:16px; font-weight:1000}
-    .kpi .small{font-size:11px; color:var(--muted); margin-top:2px}
-    .sectionTitle{display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:6px; align-items:center}
-    .sectionTitle .left{display:flex; gap:10px; align-items:center}
-    .badge{
-      display:inline-flex; align-items:center; gap:8px;
-      padding:6px 10px; border-radius:999px;
-      border:1px solid var(--line); background:rgba(255,255,255,.03);
-      font-size:11px; font-weight:900; color:var(--muted);
-    }
-    .dot{width:8px; height:8px; border-radius:999px; background:var(--accent3)}
-    .dot.rx{background:var(--warn)}
-    .dot.sup{background:var(--accent2)}
-    .dot.today{background:var(--accent)}
-    .dot.track{background:var(--danger)}
-    .item{display:flex; gap:10px; padding:9px 0; border-bottom:1px dashed rgba(255,255,255,.10)}
-    .item:last-child{border-bottom:none}
-    input[type="checkbox"]{width:18px; height:18px; margin-top:2px; accent-color:var(--accent2);}
-    .label{font-weight:1000; font-size:13px}
-    .meta{color:var(--muted); font-size:12px; margin-top:2px; line-height:1.35}
-    .doneTag{color:var(--accent2); font-weight:1000; font-size:11px; margin-left:6px}
-    .btnrow{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px}
-    .btn{
-      padding:10px 12px; border-radius:14px;
-      border:1px solid var(--line); background:rgba(255,255,255,.03); color:var(--fg);
-      font-weight:1000; cursor:pointer; box-shadow:0 2px 10px rgba(0,0,0,.18);
-    }
-    .btn:active{transform:scale(.99)}
-    .btn.danger{border-color:rgba(251,113,133,.35); background:rgba(251,113,133,.08);}
-    .banner{
-      display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; align-items:center;
-      padding:10px 12px; border-radius:16px; border:1px solid var(--line);
-      background:linear-gradient(135deg, rgba(124,58,237,.18), rgba(6,182,212,.12));
-      margin-top:10px; box-shadow:0 6px 18px rgba(0,0,0,.18);
-    }
-    .banner strong{font-size:12px}
-    .banner span{font-size:11px; color:var(--muted)}
-    .inputs{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px; margin-top:10px}
-    .inputs .box{background:rgba(255,255,255,.03); border:1px solid var(--line); border-radius:16px; padding:10px;}
-    .inputs label{display:block; font-size:11px; color:var(--muted); margin-bottom:6px; font-weight:1000}
-    .inputs input,.inputs textarea{
-      width:100%; border:1px solid rgba(255,255,255,.12); background:rgba(0,0,0,.18);
-      color:var(--fg); border-radius:14px; padding:10px; font-weight:900; font-size:13px; outline:none;
-    }
-    .inputs textarea{min-height:70px; resize:vertical}
+    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+    header{position:sticky;top:0;background:rgba(11,11,11,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);z-index:20}
+    .wrap{max-width:980px;margin:0 auto;padding:14px 12px 90px}
+    .top{padding:14px 12px}
+    h1{margin:0;font-size:18px}
+    .sub{margin-top:6px;color:var(--muted);font-size:12px}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .tab{border:1px solid var(--border);background:transparent;color:var(--text);padding:10px 12px;border-radius:999px;font-weight:800;font-size:13px;cursor:pointer}
+    .tab.active{border-color:rgba(64,255,154,.6);box-shadow:0 0 0 3px rgba(64,255,154,.12) inset}
+    .pills{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+    .pill{border:1px solid var(--border);padding:7px 10px;border-radius:999px;color:var(--muted);font-size:12px}
+    .grid{display:grid;gap:12px}
+    @media(min-width:840px){.grid{grid-template-columns:1fr 1fr}}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px}
+    .card h2{margin:0 0 10px;font-size:14px}
+    .block{border:1px solid var(--border);border-radius:14px;padding:12px;background:rgba(255,255,255,.02)}
+    .time{display:flex;justify-content:space-between;gap:10px;align-items:center;font-weight:900;font-size:13px}
+    .desc{margin-top:6px;color:var(--muted);font-size:12px;line-height:1.35}
+    .checks{margin-top:10px;display:grid;gap:8px;border-top:1px dashed rgba(255,255,255,.12);padding-top:10px}
+    label{display:flex;gap:10px;align-items:flex-start}
+    input[type="checkbox"]{margin-top:2px;transform:scale(1.15);accent-color:var(--accent)}
+    .footer{position:fixed;left:0;right:0;bottom:0;background:rgba(11,11,11,.92);backdrop-filter:blur(10px);border-top:1px solid var(--border)}
+    .footWrap{max-width:980px;margin:0 auto;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+    .btns{display:flex;gap:10px;flex-wrap:wrap}
+    button{border:1px solid var(--border);background:rgba(255,255,255,.02);color:var(--text);padding:10px 12px;border-radius:12px;font-weight:900;font-size:13px;cursor:pointer}
+    button:hover{border-color:rgba(255,255,255,.20)}
+    .tiny{color:var(--muted);font-size:12px}
   </style>
 </head>
 
 <body>
-  <header>
-    <div>
-      <h1>Final Cut Control — Day & Night</h1>
-      <div class="sub" id="subtitle"></div>
-      <div class="glowLine"></div>
+<header>
+  <div class="top">
+    <h1>Cut Control</h1>
+    <div class="sub">Simple daily plan • check-offs saved on this device</div>
+    <div class="tabs">
+      <button class="tab active" data-mode="dayshift">Dayshift</button>
+      <button class="tab" data-mode="nightshift">Nightshift</button>
+      <button class="tab" data-mode="offday">Off Day</button>
     </div>
+  </div>
+</header>
 
-    <div class="pillrow">
-      <div class="pill" id="shiftDays" onclick="setShift('days')">Days</div>
-      <div class="pill" id="shiftNights" onclick="setShift('nights')">Nights</div>
-      <div class="pill" id="modeTrain" onclick="setMode('train')">Training</div>
-      <div class="pill" id="modeOff" onclick="setMode('off')">Off-Day</div>
+<div class="wrap">
+  <div class="pills">
+    <div class="pill" id="modePill">Mode: Dayshift</div>
+    <div class="pill" id="timesPill">Wake 2:30 AM • Train 3:00–4:00 AM • Sleep 7:30 PM</div>
+  </div>
+
+  <div class="grid" id="content"></div>
+</div>
+
+<div class="footer">
+  <div class="footWrap">
+    <div class="tiny" id="progress">0 / 0 done</div>
+    <div class="btns">
+      <button id="markAll">Mark all</button>
+      <button id="reset">Reset today</button>
     </div>
-  </header>
-
-  <nav>
-    <div class="tab" id="tabToday" onclick="setTab('today')">Today</div>
-    <div class="tab" id="tabRx" onclick="setTab('rx')">Prescriptions</div>
-    <div class="tab" id="tabSupps" onclick="setTab('supps')">Supplements</div>
-    <div class="tab" id="tabMacros" onclick="setTab('macros')">Macros</div>
-    <div class="tab" id="tabTrack" onclick="setTab('track')">Tracker</div>
-  </nav>
-
-  <div id="view"></div>
+  </div>
+</div>
 
 <script>
-/* =============================
-   FINAL CUT CONTROL
-   - Dayshift timing tightened
-   - Nightshift option
-   - Supplements full list + optimized timing
-   - Peptides = pre-bed
-   - Daily reset of checkmarks
-================================ */
+  // ----------------- PLAN DATA (FRESH START) -----------------
+  // Dayshift is fully built and optimized for:
+  // Wake 2:30 AM, Train 3–4 AM, Sleep 7:30 PM.
+  // Nightshift/Offday are placeholders to edit later.
 
-const LS_KEY = "final_cut_control_v4_working";
-
-const DEFAULTS = {
-  shift: "days",
-  mode: "train",
-  tab: "today",
-  checks: {},
-  tracker: { weight:"", bf:"", steps:"", sleep:"", training:"", notes:"" },
-  lastResetDate: ""
-};
-
-const TARGETS = { cal: 1900, p: 215, c: 170, f: 50 };
-
-function clone(o){ return JSON.parse(JSON.stringify(o)); }
-function loadState(){
-  try{
-    const raw = localStorage.getItem(LS_KEY);
-    if(!raw) return clone(DEFAULTS);
-    const parsed = JSON.parse(raw);
-    return {
-      ...clone(DEFAULTS),
-      ...parsed,
-      checks: {...(parsed.checks||{})},
-      tracker: {...clone(DEFAULTS.tracker), ...(parsed.tracker||{})}
-    };
-  }catch(e){
-    return clone(DEFAULTS);
-  }
-}
-let state = loadState();
-function saveState(){ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
-
-function todayISO(){
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth()+1).padStart(2,"0");
-  const day = String(d.getDate()).padStart(2,"0");
-  return `${y}-${m}-${day}`;
-}
-function maybeDailyReset(){
-  const t = todayISO();
-  if(state.lastResetDate !== t){
-    state.checks = {};
-    state.lastResetDate = t;
-    saveState();
-  }
-}
-
-function mk(id,label,meta){ return { id,label,meta }; }
-function block(title, items){ return { title, items }; }
-
-/* ========= TODAY PLANS ========= */
-function getPlan(shift, mode){
-  if(shift === "days"){
-    return [
-      { time:"3:30 AM", title:"Wake / Hydrate",
-        macros:{p:25,c:35,f:2,cal:260},
-        items:[
-          mk("d_wake_shake","ISO100 + banana","Fast protein + carbs"),
-          mk("d_wake_water","Water + electrolytes (optional LMNT)","Hydration early")
-        ]
-      },
-      { time:"6:30 AM", title:"Meal 2 (Work Fuel)",
-        macros:{p:50,c:45,f:8,cal:460},
-        items:[
-          mk("d_m2_pro","7–9 oz lean protein","Chicken/fish/96-4"),
-          mk("d_m2_carb","1 cup cooked rice (or potato)","Energy for the shift"),
-          mk("d_m2_veg","Veg / salsa / hot sauce","Volume + fiber")
-        ]
-      },
-      { time:"9:30 AM", title:"Meal 3 (Protein Pulse)",
-        macros:{p:45,c:35,f:6,cal:380},
-        items:[
-          mk("d_m3_pro","Lean protein (6–8 oz)",""),
-          mk("d_m3_carb","½–1 cup rice / fruit / oats","Adjust to hunger/work"),
-          mk("d_m3_veg","Veg","")
-        ]
-      },
-      { time:"12:30 PM", title:"Meal 4 (Midday Anchor)",
-        macros:{p:45,c:25,f:10,cal:370},
-        items:[
-          mk("d_m4_pro","Lean protein (6–8 oz)",""),
-          mk("d_m4_carb","Small carbs if needed","If you’re dragging, add carbs"),
-          mk("d_m4_veg","Veg","")
-        ]
-      },
-      { time:"4:45–5:15 PM", title:"Pre-Workout",
-        macros:(mode==="train"?{p:25,c:35,f:2,cal:260}:{p:25,c:10,f:2,cal:160}),
-        items:[
-          mk("d_pre_pro","ISO100 (or small protein meal)",""),
-          mk("d_pre_carb",mode==="train"?"Carbs (banana/oats/rice)":"Keep carbs light","Match the day")
-        ]
-      },
-      { time:"6:30–8:00 PM", title:(mode==="train"?"Training Block":"Recovery Block"),
-        macros:null,
-        items:[ mk("d_block",mode==="train"?"Lift 6:30–8:00":"Walk + mobility 20–40 min","") ]
-      },
-      { time:"8:05 PM", title:"Post / Dinner",
-        macros:(mode==="train"?{p:55,c:15,f:18,cal:520}:{p:55,c:5,f:20,cal:480}),
-        items:[
-          mk("d_post_pro","Lean protein + veg","Anchor the day"),
-          mk("d_post_optional",mode==="train"?"Optional small carbs":"Skip/very small carbs","")
-        ]
-      },
-      { time:"8:30–8:45 PM", title:"Pre-bed Protocol",
-        macros:null,
-        items:[
-          mk("d_sleep","Lights out","Sleep target: 8:45 PM")
-        ]
-      }
-    ];
-  }
-
-  // Nightshift (your classic flow)
-  return [
-    { time:"1:00 PM", title:"Wake / Pre-Workout",
-      macros:{p:25,c:40,f:2,cal:280},
-      items:[
-        mk("n_wake_shake","ISO100 + banana",""),
-        mk("n_wake_water","Water + electrolytes (optional LMNT)","")
+  const plans = {
+    dayshift: {
+      title: "Dayshift",
+      times: "Wake 2:30 AM • Train 3:00–4:00 AM • Sleep 7:30 PM",
+      sections: [
+        {
+          title: "Wake + Prime",
+          blocks: [
+            {
+              time: "2:30 AM",
+              desc: "Hydrate + electrolytes immediately. Sets performance + prevents cramps on early training.",
+              checks: [
+                "16–24 oz water",
+                "Electrolytes (LMNT or Squench Zero)"
+              ]
+            },
+            {
+              time: "2:35 AM",
+              desc: "AM meds that don’t need food/fat (and are usually fine early). Follow your prescription label if it conflicts.",
+              checks: [
+                "Lisinopril 20 mg",
+                "Bupropion AM (ONLY if prescribed)"
+              ]
+            }
+          ]
+        },
+        {
+          title: "Pre-Workout",
+          blocks: [
+            {
+              time: "2:45 AM",
+              desc: "Best early lift fuel: banana + whey isolate (fast carbs + fast protein).",
+              checks: [
+                "Banana",
+                "Whey isolate (ISO100)"
+              ]
+            },
+            {
+              time: "2:50 AM",
+              desc: "Optional: L-theanine smooths caffeine + focus (if you use caffeine).",
+              checks: [
+                "L-theanine 100–200 mg (optional)"
+              ]
+            }
+          ]
+        },
+        {
+          title: "Training + Post",
+          blocks: [
+            {
+              time: "3:00–4:00 AM",
+              desc: "Train. Sip water. Add electrolytes if you sweat heavy.",
+              checks: [
+                "Workout done",
+                "Hydration during training"
+              ]
+            },
+            {
+              time: "4:15 AM",
+              desc: "Post workout shake + creatine (easy daily anchor).",
+              checks: [
+                "Post-workout whey isolate",
+                "Creatine 5 g"
+              ]
+            }
+          ]
+        },
+        {
+          title: "Meals + Supplements (Best absorption timing)",
+          blocks: [
+            {
+              time: "7:15 AM — Meal 1",
+              desc: "First full meal ~3 hours after shake. Include a little fat for absorption of D3/K2/Vit A + multi.",
+              checks: [
+                "Meal 1 (lean protein + carbs + small fat)",
+                "Vitamin D3",
+                "Vitamin K2",
+                "Vitamin A (10,000 IU) / A-pack",
+                "Multi pack vitamin (with meal)"
+              ]
+            },
+            {
+              time: "11:00 AM — Meal 2",
+              desc: "With food is usually best for glucosamine + Vascepa (split dose).",
+              checks: [
+                "Meal 2",
+                "Glucosamine (with food)",
+                "Vascepa (part 1 of total daily)"
+              ]
+            },
+            {
+              time: "2:30 PM — Meal 3",
+              desc: "Steady energy. Take fenofibrate with food if your label says so.",
+              checks: [
+                "Meal 3",
+                "Fenofibrate 145 mg (per label)"
+              ]
+            },
+            {
+              time: "5:45 PM — Final Meal",
+              desc: "Early final meal = better sleep. Finish Vascepa daily total if splitting.",
+              checks: [
+                "Final meal",
+                "Vascepa (remainder to reach 4 g/day total)"
+              ]
+            }
+          ]
+        },
+        {
+          title: "Evening + Sleep Stack",
+          blocks: [
+            {
+              time: "6:45 PM",
+              desc: "Atorvastatin is commonly taken in the evening (follow your label).",
+              checks: [
+                "Atorvastatin 40 mg"
+              ]
+            },
+            {
+              time: "7:00 PM",
+              desc: "Magnesium before bed for relaxation/sleep quality.",
+              checks: [
+                "Magnesium (bisglycinate)"
+              ]
+            },
+            {
+              time: "7:05 PM",
+              desc: "If you run peptides pre-bed, keep timing consistent.",
+              checks: [
+                "Peptide stack (optional)"
+              ]
+            },
+            {
+              time: "7:10 PM",
+              desc: "Casein is optional pre-bed. If it makes you too full, move earlier.",
+              checks: [
+                "Casein (optional)"
+              ]
+            },
+            {
+              time: "7:30 PM",
+              desc: "Lights out.",
+              checks: [
+                "Sleep"
+              ]
+            }
+          ]
+        }
       ]
     },
-    { time:"2:00 PM", title:(mode==="train"?"Training":"Recovery"),
-      macros:null,
-      items:[ mk("n_train",mode==="train"?"Lift":"Walk + mobility","") ]
+
+    nightshift: {
+      title: "Nightshift",
+      times: "Placeholder (edit later)",
+      sections: [
+        {
+          title: "Nightshift (placeholder)",
+          blocks: [
+            {
+              time: "—",
+              desc: "Paste your nightshift schedule here later and I’ll format it the same.",
+              checks: ["Nightshift plan stays as placeholder for now"]
+            }
+          ]
+        }
+      ]
     },
-    { time:"3:15 PM", title:"Post",
-      macros:(mode==="train"?{p:40,c:50,f:5,cal:405}:{p:40,c:20,f:5,cal:285}),
-      items:[ mk("n_post","Protein + carbs (oats/rice)","Match the day") ]
-    },
-    { time:"7:00 PM", title:"Meal",
-      macros:{p:60,c:45,f:15,cal:555},
-      items:[ mk("n_meal","Lean protein + rice + veg","") ]
-    },
-    { time:"1:00 AM", title:"Final Meal",
-      macros:{p:50,c:15,f:18,cal:470},
-      items:[ mk("n_last","Lean protein (option: casein)","") ]
-    },
-    { time:"Pre-sleep", title:"Pre-bed Protocol",
-      macros:null,
-      items:[ mk("n_sleep","Lights out","") ]
+
+    offday: {
+      title: "Off Day",
+      times: "Placeholder (edit later)",
+      sections: [
+        {
+          title: "Off Day (placeholder)",
+          blocks: [
+            {
+              time: "—",
+              desc: "Add your lower-cal off-day structure here later.",
+              checks: ["Off day plan stays as placeholder for now"]
+            }
+          ]
+        }
+      ]
     }
-  ];
-}
+  };
 
-/* ========= PRESCRIPTIONS ========= */
-function getPrescriptions(shift){
-  if(shift === "days"){
-    return [
-      block("6:30 AM — With first real meal", [
-        mk("rx_feno_days","Fenofibrate 145 mg","Take as prescribed (often with food)"),
-        mk("rx_vascepa1_days","Vascepa (part 1 of daily total)","Total is 4 g/day — many split doses")
-      ]),
-      block("11:30 AM — Consistent time", [
-        mk("rx_lisin_days","Lisinopril 20 mg","Same time daily")
-      ]),
-      block("8:05 PM — Evening / Dinner", [
-        mk("rx_atorva_days","Atorvastatin 40 mg","Often taken in evening (follow your label)"),
-        mk("rx_vascepa2_days","Vascepa (part 2 of daily total)","Completes daily total")
-      ]),
-      block("Pre-bed (8:30–8:45 PM)", [
-        mk("rx_zoloft_days","Zoloft (sertraline) 50 mg","Take as prescribed (AM or PM depending on you)")
-      ])
-    ];
-  }
+  // ----------------- STATE (SAVES DAILY) -----------------
+  const STORAGE_KEY = "cutcontrol_reset_v1";
+  const TODAY = new Date().toISOString().slice(0,10); // YYYY-MM-DD
+  let state = load();
 
-  return [
-    block("Post-wake / first meal window", [
-      mk("rx_feno_nights","Fenofibrate 145 mg","Take as prescribed (often with food)"),
-      mk("rx_vascepa1_nights","Vascepa (part 1 of daily total)","Total is 4 g/day — many split doses")
-    ]),
-    block("Mid-shift (consistent time)", [
-      mk("rx_lisin_nights","Lisinopril 20 mg","Same time daily")
-    ]),
-    block("Later meal / evening", [
-      mk("rx_atorva_nights","Atorvastatin 40 mg","Often taken in evening (follow your label)"),
-      mk("rx_vascepa2_nights","Vascepa (part 2 of daily total)","Completes daily total")
-    ]),
-    block("Pre-sleep", [
-      mk("rx_zoloft_nights","Zoloft (sertraline) 50 mg","Take as prescribed (AM or PM depending on you)")
-    ])
-  ];
-}
-
-/* ========= SUPPLEMENTS — FULL LIST + OPTIMIZED TIMING =========
-   List:
-   - LMNT
-   - D3 + K2
-   - Glucosamine
-   - Protein (ISO100)
-   - Casein (optional)
-   - Glutathione
-   - Creatine (optional)
-   - B-Complex (optional)
-   - L-Carnitine (optional)
-   - Citrulline/Arginine (optional)
-   - Taurine (optional)
-   - Beet powder/juice (optional)
-   - Magnesium (optional)
-   - Peptides (AOD/CJC/Ipam) pre-bed
-*/
-function getSupplements(shift){
-  if(shift === "days"){
-    return [
-      block("3:30 AM — Wake (Core)", [
-        mk("sup_lmnt_days","LMNT (1 pack)","Hydration early"),
-        mk("sup_bcomplex_days","B-Complex (optional)","AM is best if it energizes you"),
-        mk("sup_glucosamine_days","Glucosamine","Joint support")
-      ]),
-      block("6:30 AM — With meal (Core)", [
-        mk("sup_d3k2_days","Vitamin D3 + K2","With food is ideal"),
-        mk("sup_creatine_days","Creatine (optional)","Daily consistency > timing")
-      ]),
-      block("4:45–5:15 PM — Pre-workout (Performance)", [
-        mk("sup_iso_days","Protein (ISO100)","Easy on the stomach"),
-        mk("sup_carnitine_days","L-Carnitine (optional)","If you run it"),
-        mk("sup_no_days","Citrulline/Arginine (optional)","Pump/performance"),
-        mk("sup_taurine_days","Taurine (optional)","If you run it"),
-        mk("sup_beet_days","Beet powder/juice (optional)","If you run it")
-      ]),
-      block("8:30–8:45 PM — Pre-bed Protocol (Non-negotiable)", [
-        mk("sup_pep_days","Peptides (AOD / CJC / Ipam combo)","Pre-bed protocol"),
-        mk("sup_glutathione_days","Glutathione","Pre-bed is fine"),
-        mk("sup_mag_days","Magnesium (optional)","Best pre-bed"),
-        mk("sup_casein_days","Casein (optional)","Only if hungry / short protein")
-      ])
-    ];
-  }
-
-  // Nights
-  return [
-    block("1:00 PM — Wake (Core)", [
-      mk("sup_lmnt_nights","LMNT (1 pack)","Hydration early"),
-      mk("sup_bcomplex_nights","B-Complex (optional)","Take early if energizing"),
-      mk("sup_glucosamine_nights","Glucosamine","Joint support")
-    ]),
-    block("With first meal (Core)", [
-      mk("sup_d3k2_nights","Vitamin D3 + K2","With food is ideal"),
-      mk("sup_creatine_nights","Creatine (optional)","Daily consistency > timing")
-    ]),
-    block("Training window (Performance)", [
-      mk("sup_iso_nights","Protein (ISO100)","Pre or post"),
-      mk("sup_carnitine_nights","L-Carnitine (optional)","If you run it"),
-      mk("sup_no_nights","Citrulline/Arginine (optional)","Pump/performance"),
-      mk("sup_taurine_nights","Taurine (optional)","If you run it"),
-      mk("sup_beet_nights","Beet powder/juice (optional)","If you run it"),
-      mk("sup_casein_nights","Casein (optional)","Only if hungry / short protein")
-    ]),
-    block("Pre-sleep Protocol (Non-negotiable)", [
-      mk("sup_pep_nights","Peptides (AOD / CJC / Ipam combo)","Pre-bed protocol"),
-      mk("sup_glutathione_nights","Glutathione","Pre-sleep is fine"),
-      mk("sup_mag_nights","Magnesium (optional)","Best pre-sleep")
-    ])
-  ];
-}
-
-/* ========= UI STATE ========= */
-function setShift(s){ state.shift=s; saveState(); syncHeader(); render(); }
-function setMode(m){ state.mode=m; saveState(); syncHeader(); render(); }
-function setTab(t){ state.tab=t; saveState(); render(); }
-
-function checked(id){ return !!state.checks[id]; }
-function toggleCheck(id){ state.checks[id]=!state.checks[id]; saveState(); render(); }
-function clearAllChecks(){ state.checks={}; saveState(); render(); }
-
-function syncHeader(){
-  const shiftLabel = state.shift==="days"
-    ? "Dayshift (Wake 3:30 AM • Meals 6:30/9:30/12:30 • Train 6:30–8:00 PM • Sleep 8:45 PM)"
-    : "Nightshift (Wake 1:00 PM • Train ~2:00 PM • Meals 3:15/7:00/1:00 • Pre-sleep protocol)";
-  const modeLabel = state.mode==="train" ? "Training day" : "Off day";
-  const subtitle = `${shiftLabel} • ${modeLabel} • Target ${TARGETS.cal} kcal | ${TARGETS.p}P / ${TARGETS.c}C / ${TARGETS.f}F • Peptides = pre-bed`;
-  document.getElementById("subtitle").textContent = subtitle;
-
-  document.getElementById("shiftDays").classList.toggle("active", state.shift==="days");
-  document.getElementById("shiftNights").classList.toggle("active", state.shift==="nights");
-  document.getElementById("modeTrain").classList.toggle("active", state.mode==="train");
-  document.getElementById("modeOff").classList.toggle("active", state.mode==="off");
-}
-
-function sumMacros(plan){
-  let p=0,c=0,f=0,cal=0;
-  for(const b of plan){
-    if(b.macros){ p+=b.macros.p||0; c+=b.macros.c||0; f+=b.macros.f||0; cal+=b.macros.cal||0; }
-  }
-  return {p,c,f,cal};
-}
-function countChecks(items){
-  let total=0, done=0;
-  for(const it of items){ total++; if(checked(it.id)) done++; }
-  return {total, done};
-}
-
-/* ========= RENDER ========= */
-function render(){
-  document.getElementById("tabToday").classList.toggle("active", state.tab==="today");
-  document.getElementById("tabRx").classList.toggle("active", state.tab==="rx");
-  document.getElementById("tabSupps").classList.toggle("active", state.tab==="supps");
-  document.getElementById("tabMacros").classList.toggle("active", state.tab==="macros");
-  document.getElementById("tabTrack").classList.toggle("active", state.tab==="track");
-
-  const view = document.getElementById("view");
-  view.innerHTML = "";
-
-  if(state.tab==="today") renderToday(view);
-  if(state.tab==="rx") renderRx(view);
-  if(state.tab==="supps") renderSupps(view);
-  if(state.tab==="macros") renderMacros(view);
-  if(state.tab==="track") renderTracker(view);
-}
-
-function renderToday(root){
-  const plan = getPlan(state.shift, state.mode);
-  const allItems = plan.flatMap(b => b.items || []);
-  const prog = countChecks(allItems);
-
-  const top = el("div","card");
-  top.appendChild(el("div","row",
-    el("div",null,
-      el("div","sectionTitle",
-        el("div","left", badge("today","Today"), strong("Checklist")),
-        el("div","stamp",`Reset daily • ${todayISO()}`)
-      ),
-      el("div","sub","Tap items. Saves automatically."),
-      el("div","banner",
-        el("div",null, strong("Protocol lock: Peptides = pre-bed"), el("div",null, el("span",null,"Keep timing consistent."))),
-        el("div",null, el("span",null, state.shift==="days" ? "Pre-bed ~8:30–8:45 PM" : "Pre-sleep (end of shift)"))
-      )
-    )
-  ));
-
-  const k = el("div","kpi");
-  k.appendChild(kpiBox(`${prog.done}/${prog.total}`,"Tasks done"));
-  k.appendChild(kpiBox(state.shift==="days" ? "6:30 PM" : "2:00 PM","Training time"));
-  k.appendChild(kpiBox(`${TARGETS.p}P / ${TARGETS.c}C / ${TARGETS.f}F`,"Daily target"));
-  top.appendChild(k);
-
-  const btnrow = el("div","btnrow");
-  btnrow.appendChild(btn("Clear today checkmarks", () => clearAllChecks(), "danger"));
-  top.appendChild(btnrow);
-
-  root.appendChild(top);
-
-  for(const b of plan){
-    const card = el("div","card");
-    card.appendChild(el("div","sectionTitle",
-      el("div","left", badge("today", b.time), strong(b.title)),
-      b.macros ? el("div","stamp",`${b.macros.cal} kcal • ${b.macros.p}P / ${b.macros.c}C / ${b.macros.f}F`) : el("div","stamp","")
-    ));
-    for(const it of b.items){
-      card.appendChild(checkRow(it.id, it.label, it.meta));
+  function load(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return { mode:"dayshift", days:{} };
+      const s = JSON.parse(raw);
+      if(!s.mode) s.mode = "dayshift";
+      if(!s.days) s.days = {};
+      if(!s.days[TODAY]) s.days[TODAY] = {};
+      return s;
+    }catch(e){
+      return { mode:"dayshift", days:{} };
     }
-    root.appendChild(card);
   }
-}
-
-function renderRx(root){
-  const blocks = getPrescriptions(state.shift);
-
-  const top = el("div","card");
-  top.appendChild(el("div",null,
-    el("div","sectionTitle",
-      el("div","left", badge("rx","Rx"), strong("Prescriptions")),
-      el("div","stamp","Follow your label if different")
-    ),
-    el("div","sub","Zoloft 50mg • Lisinopril 20mg • Atorvastatin 40mg • Fenofibrate 145mg • Vascepa 4g/day")
-  ));
-  root.appendChild(top);
-
-  for(const b of blocks){
-    const card = el("div","card");
-    card.appendChild(el("div","sectionTitle",
-      el("div","left", badge("rx", b.title), strong("")),
-      el("div","stamp","")
-    ));
-    for(const it of b.items){
-      card.appendChild(checkRow(it.id, it.label, it.meta));
-    }
-    root.appendChild(card);
+  function bucket(){
+    if(!state.days[TODAY]) state.days[TODAY] = {};
+    if(!state.days[TODAY][state.mode]) state.days[TODAY][state.mode] = {};
+    return state.days[TODAY][state.mode];
   }
-}
-
-function renderSupps(root){
-  const blocks = getSupplements(state.shift);
-
-  const top = el("div","card");
-  top.appendChild(el("div",null,
-    el("div","sectionTitle",
-      el("div","left", badge("sup","Stack"), strong("Supplements")),
-      el("div","stamp","Optimized timing")
-    ),
-    el("div","sub","Optional items are labeled optional. Peptides are always pre-bed.")
-  ));
-  root.appendChild(top);
-
-  for(const b of blocks){
-    const card = el("div","card");
-    card.appendChild(el("div","sectionTitle",
-      el("div","left", badge("sup", b.title), strong("")),
-      el("div","stamp","")
-    ));
-    for(const it of b.items){
-      card.appendChild(checkRow(it.id, it.label, it.meta));
-    }
-    root.appendChild(card);
+  function save(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    updateProgress();
   }
-}
 
-function renderMacros(root){
-  const plan = getPlan(state.shift, state.mode);
-  const sums = sumMacros(plan);
+  // ----------------- RENDER -----------------
+  const tabs = [...document.querySelectorAll(".tab")];
+  tabs.forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      tabs.forEach(t=>t.classList.remove("active"));
+      btn.classList.add("active");
+      state.mode = btn.dataset.mode;
+      save();
+      render();
+    });
+  });
 
-  const card = el("div","card");
-  card.appendChild(el("div","sectionTitle",
-    el("div","left", badge("today","Macros"), strong("Macro Map")),
-    el("div","stamp",`${state.shift.toUpperCase()} • ${state.mode==="train"?"TRAIN":"OFF"}`)
-  ));
-  card.appendChild(el("div","sub","Planned macros from Today blocks. Log exact food in MyFitnessPal for precision."));
+  function render(){
+    const plan = plans[state.mode];
+    document.getElementById("modePill").textContent = "Mode: " + plan.title;
+    document.getElementById("timesPill").textContent = plan.times;
 
-  const k1 = el("div","kpi");
-  k1.appendChild(kpiBox(`${TARGETS.cal}`,"Target kcal"));
-  k1.appendChild(kpiBox(`${sums.cal}`,"Planned kcal"));
-  k1.appendChild(kpiBox(`${Math.max(0, TARGETS.cal - sums.cal)}`,"Kcal remaining"));
-  card.appendChild(k1);
+    const root = document.getElementById("content");
+    root.innerHTML = "";
 
-  const k2 = el("div","kpi");
-  k2.appendChild(kpiBox(`${sums.p}/${TARGETS.p}`,"Protein (P)"));
-  k2.appendChild(kpiBox(`${sums.c}/${TARGETS.c}`,"Carbs (C)"));
-  k2.appendChild(kpiBox(`${sums.f}/${TARGETS.f}`,"Fat (F)"));
-  card.appendChild(k2);
+    plan.sections.forEach((sec, sIdx)=>{
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `<h2>${sec.title}</h2>`;
 
-  root.appendChild(card);
-}
+      sec.blocks.forEach((blk, bIdx)=>{
+        const block = document.createElement("div");
+        block.className = "block";
 
-function renderTracker(root){
-  const t = state.tracker;
+        const head = document.createElement("div");
+        head.className = "time";
+        head.innerHTML = `<span>${blk.time}</span><span class="tiny">${plan.title}</span>`;
+        block.appendChild(head);
 
-  const card = el("div","card");
-  card.appendChild(el("div","sectionTitle",
-    el("div","left", badge("track","Log"), strong("Tracker")),
-    el("div","stamp","Saves on-device")
-  ));
-  card.appendChild(el("div","sub","Quick log: weight, BF%, steps, sleep, training, notes."));
+        const desc = document.createElement("div");
+        desc.className = "desc";
+        desc.textContent = blk.desc || "";
+        block.appendChild(desc);
 
-  const inputs = el("div","inputs");
-  inputs.appendChild(inputBox("Weight (lbs)","weight",t.weight,"e.g. 187.4"));
-  inputs.appendChild(inputBox("Body fat %","bf",t.bf,"e.g. 18.0"));
-  inputs.appendChild(inputBox("Steps","steps",t.steps,"e.g. 12000"));
-  inputs.appendChild(inputBox("Sleep (hrs)","sleep",t.sleep,"e.g. 7.0"));
-  inputs.appendChild(textBox("Training (what you did)","training",t.training,"Push / Pull / Legs..."));
-  inputs.appendChild(textBox("Notes (HRV, hunger, water, etc.)","notes",t.notes,"Anything important today"));
-  card.appendChild(inputs);
+        const checks = document.createElement("div");
+        checks.className = "checks";
 
-  const btnrow = el("div","btnrow");
-  btnrow.appendChild(btn("Clear tracker fields", () => { state.tracker = {...DEFAULTS.tracker}; saveState(); render(); }, "danger"));
-  card.appendChild(btnrow);
+        (blk.checks||[]).forEach((text, cIdx)=>{
+          const key = `${state.mode}::${sIdx}::${bIdx}::${cIdx}`;
+          const row = document.createElement("label");
 
-  root.appendChild(card);
-}
+          const cb = document.createElement("input");
+          cb.type = "checkbox";
+          cb.checked = !!bucket()[key];
+          cb.addEventListener("change", ()=>{
+            bucket()[key] = cb.checked ? 1 : 0;
+            save();
+          });
 
-/* ========= DOM HELPERS ========= */
-function el(tag, cls, ...kids){
-  const n = document.createElement(tag);
-  if(cls) n.className = cls;
-  for(const k of kids){
-    if(k === null || k === undefined) continue;
-    if(typeof k === "string") n.appendChild(document.createTextNode(k));
-    else n.appendChild(k);
+          const t = document.createElement("div");
+          t.innerHTML = `<div style="font-weight:900;font-size:13px">${escapeHtml(text)}</div>`;
+
+          row.appendChild(cb);
+          row.appendChild(t);
+          checks.appendChild(row);
+        });
+
+        block.appendChild(checks);
+        card.appendChild(block);
+      });
+
+      root.appendChild(card);
+    });
+
+    updateProgress();
   }
-  return n;
-}
-function strong(text){
-  const s = document.createElement("span");
-  s.style.fontWeight = "1000";
-  s.textContent = text;
-  return s;
-}
-function badge(type, text){
-  const b = document.createElement("span");
-  b.className = "badge";
-  const d = document.createElement("span");
-  d.className = "dot " + (type || "");
-  b.appendChild(d);
-  b.appendChild(document.createTextNode(text));
-  return b;
-}
-function btn(text, onClick, variant){
-  const b = document.createElement("button");
-  b.className = "btn" + (variant ? ` ${variant}` : "");
-  b.textContent = text;
-  b.onclick = onClick;
-  return b;
-}
-function kpiBox(big, small){
-  const d = el("div",null);
-  d.appendChild(el("div","big", big));
-  d.appendChild(el("div","small", small));
-  return d;
-}
-function checkRow(id, label, meta){
-  const wrap = el("div","item");
-  const cb = document.createElement("input");
-  cb.type = "checkbox";
-  cb.checked = checked(id);
-  cb.onchange = () => toggleCheck(id);
 
-  const text = el("div",null,
-    el("div","label", label, cb.checked ? el("span","doneTag","✓") : null),
-    meta ? el("div","meta", meta) : el("div","meta","")
-  );
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, s=>({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+    }[s]));
+  }
 
-  wrap.appendChild(cb);
-  wrap.appendChild(text);
-  return wrap;
-}
-function inputBox(title, key, value, placeholder){
-  const box = el("div","box");
-  box.appendChild(el("label",null,title));
-  const input = document.createElement("input");
-  input.value = value || "";
-  input.placeholder = placeholder || "";
-  input.oninput = (e) => { state.tracker[key] = e.target.value; saveState(); };
-  box.appendChild(input);
-  return box;
-}
-function textBox(title, key, value, placeholder){
-  const box = el("div","box");
-  box.appendChild(el("label",null,title));
-  const ta = document.createElement("textarea");
-  ta.value = value || "";
-  ta.placeholder = placeholder || "";
-  ta.oninput = (e) => { state.tracker[key] = e.target.value; saveState(); };
-  box.appendChild(ta);
-  return box;
-}
+  function updateProgress(){
+    const plan = plans[state.mode];
+    const b = bucket();
+    let total = 0, done = 0;
 
-/* ========= BOOT ========= */
-maybeDailyReset();
-syncHeader();
-if(!state.tab) state.tab="today";
-render();
+    plan.sections.forEach((sec,sIdx)=>{
+      sec.blocks.forEach((blk,bIdx)=>{
+        (blk.checks||[]).forEach((_,cIdx)=>{
+          total++;
+          const key = `${state.mode}::${sIdx}::${bIdx}::${cIdx}`;
+          if(b[key]) done++;
+        });
+      });
+    });
+
+    document.getElementById("progress").textContent = `${done} / ${total} done`;
+  }
+
+  document.getElementById("reset").addEventListener("click", ()=>{
+    if(!state.days[TODAY]) state.days[TODAY] = {};
+    state.days[TODAY][state.mode] = {};
+    save();
+    render();
+  });
+
+  document.getElementById("markAll").addEventListener("click", ()=>{
+    const plan = plans[state.mode];
+    const b = bucket();
+    plan.sections.forEach((sec,sIdx)=>{
+      sec.blocks.forEach((blk,bIdx)=>{
+        (blk.checks||[]).forEach((_,cIdx)=>{
+          const key = `${state.mode}::${sIdx}::${bIdx}::${cIdx}`;
+          b[key] = 1;
+        });
+      });
+    });
+    save();
+    render();
+  });
+
+  // init active tab
+  tabs.forEach(t=>t.classList.toggle("active", t.dataset.mode===state.mode));
+  render();
 </script>
 </body>
 </html>

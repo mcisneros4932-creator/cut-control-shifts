@@ -18,7 +18,7 @@
     h1{margin:0;font-size:18px}
     .sub{margin-top:6px;color:var(--muted);font-size:12px}
     .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-    .tab{border:1px solid var(--border);background:transparent;color:var(--text);padding:10px 12px;border-radius:999px;font-weight:800;font-size:13px;cursor:pointer}
+    .tab{border:1px solid var(--border);background:transparent;color:var(--text);padding:10px 12px;border-radius:999px;font-weight:900;font-size:13px;cursor:pointer}
     .tab.active{border-color:rgba(64,255,154,.6);box-shadow:0 0 0 3px rgba(64,255,154,.12) inset}
     .pills{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
     .pill{border:1px solid var(--border);padding:7px 10px;border-radius:999px;color:var(--muted);font-size:12px}
@@ -27,7 +27,17 @@
     .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px}
     .card h2{margin:0 0 10px;font-size:14px}
     .block{border:1px solid var(--border);border-radius:14px;padding:12px;background:rgba(255,255,255,.02)}
-    .time{display:flex;justify-content:space-between;gap:10px;align-items:center;font-weight:900;font-size:13px}
+    .time{
+      display:flex;justify-content:space-between;gap:10px;align-items:center;
+      font-weight:900;font-size:13px
+    }
+    .rightMini{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+    .tag{
+      border:1px solid var(--border);
+      padding:4px 8px;border-radius:999px;
+      font-size:11px;color:var(--muted)
+    }
+    .tag.accent{border-color:rgba(64,255,154,.35);color:#bfffe0}
     .desc{margin-top:6px;color:var(--muted);font-size:12px;line-height:1.35}
     .checks{margin-top:10px;display:grid;gap:8px;border-top:1px dashed rgba(255,255,255,.12);padding-top:10px}
     label{display:flex;gap:10px;align-items:flex-start}
@@ -58,6 +68,7 @@
   <div class="pills">
     <div class="pill" id="modePill">Mode: Dayshift</div>
     <div class="pill" id="timesPill">Wake 2:30 AM • Train 3:00–4:00 AM • Sleep 7:30 PM</div>
+    <div class="pill" id="targetPill">Targets: 1900 kcal • 220P / 50F / 170C</div>
   </div>
 
   <div class="grid" id="content"></div>
@@ -74,15 +85,34 @@
 </div>
 
 <script>
-  // ----------------- PLAN DATA (FRESH START) -----------------
-  // Dayshift is fully built and optimized for:
-  // Wake 2:30 AM, Train 3–4 AM, Sleep 7:30 PM.
-  // Nightshift/Offday are placeholders to edit later.
+  // ----------------- MACRO HELPERS -----------------
+  function kcalFromMacros(p,c,f){ return (p*4)+(c*4)+(f*9); }
+  function macroText(m){
+    if(!m) return "";
+    return `P${m.p} / C${m.c} / F${m.f}`;
+  }
+
+  // ----------------- PLAN DATA (FRESH START + MACROS) -----------------
+  const dailyTargets = { kcal: 1900, p:220, f:50, c:170 };
+
+  // Macro split built for best carb timing around 3–4 AM training.
+  // Totals = 220P / 170C / 50F (≈ 2010 kcal). We'll show the computed value in the UI.
+  const dayMacroSplit = {
+    pre:   { p:25, c:30, f:2 },   // 2:45 AM (banana + whey)
+    post:  { p:30, c:20, f:1 },   // 4:15 AM (shake)
+    meal1: { p:55, c:45, f:15 },  // 7:15 AM (first real meal, includes fat for vitamin absorption)
+    meal2: { p:45, c:35, f:12 },  // 11:00 AM
+    meal3: { p:40, c:25, f:10 },  // 2:30 PM
+    final: { p:25, c:15, f:10 }   // 5:45 PM
+  };
 
   const plans = {
     dayshift: {
       title: "Dayshift",
       times: "Wake 2:30 AM • Train 3:00–4:00 AM • Sleep 7:30 PM",
+      targets: dailyTargets,
+      macroNote:
+        "Note: 220P/50F/170C calculates to ~2010 kcal. If you truly want 1900, carbs would be ~143 with 220P/50F.",
       sections: [
         {
           title: "Wake + Prime",
@@ -90,59 +120,44 @@
             {
               time: "2:30 AM",
               desc: "Hydrate + electrolytes immediately. Sets performance + prevents cramps on early training.",
-              checks: [
-                "16–24 oz water",
-                "Electrolytes (LMNT or Squench Zero)"
-              ]
+              checks: ["16–24 oz water", "Electrolytes (LMNT or Squench Zero)"]
             },
             {
               time: "2:35 AM",
               desc: "AM meds that don’t need food/fat (and are usually fine early). Follow your prescription label if it conflicts.",
-              checks: [
-                "Lisinopril 20 mg",
-                "Bupropion AM (ONLY if prescribed)"
-              ]
+              checks: ["Lisinopril 20 mg", "Bupropion AM (ONLY if prescribed)"]
             }
           ]
         },
         {
-          title: "Pre-Workout",
+          title: "Pre-Workout (Feeding 1)",
           blocks: [
             {
               time: "2:45 AM",
-              desc: "Best early lift fuel: banana + whey isolate (fast carbs + fast protein).",
-              checks: [
-                "Banana",
-                "Whey isolate (ISO100)"
-              ]
+              macros: dayMacroSplit.pre,
+              desc: "Feeding 1 macros set for training performance (fast carbs + fast protein).",
+              checks: ["Banana", "Whey isolate (ISO100)"]
             },
             {
               time: "2:50 AM",
               desc: "Optional: L-theanine smooths caffeine + focus (if you use caffeine).",
-              checks: [
-                "L-theanine 100–200 mg (optional)"
-              ]
+              checks: ["L-theanine 100–200 mg (optional)"]
             }
           ]
         },
         {
-          title: "Training + Post",
+          title: "Training + Post (Feeding 2)",
           blocks: [
             {
               time: "3:00–4:00 AM",
               desc: "Train. Sip water. Add electrolytes if you sweat heavy.",
-              checks: [
-                "Workout done",
-                "Hydration during training"
-              ]
+              checks: ["Workout done", "Hydration during training"]
             },
             {
               time: "4:15 AM",
-              desc: "Post workout shake + creatine (easy daily anchor).",
-              checks: [
-                "Post-workout whey isolate",
-                "Creatine 5 g"
-              ]
+              macros: dayMacroSplit.post,
+              desc: "Feeding 2 macros: quick recovery shake. Creatine anchored here daily.",
+              checks: ["Post-workout whey isolate", "Creatine 5 g"]
             }
           ]
         },
@@ -150,8 +165,9 @@
           title: "Meals + Supplements (Best absorption timing)",
           blocks: [
             {
-              time: "7:15 AM — Meal 1",
-              desc: "First full meal ~3 hours after shake. Include a little fat for absorption of D3/K2/Vit A + multi.",
+              time: "7:15 AM — Meal 1 (Feeding 3)",
+              macros: dayMacroSplit.meal1,
+              desc: "Biggest meal macros. Include a little fat for D3/K2/Vit A + multi absorption.",
               checks: [
                 "Meal 1 (lean protein + carbs + small fat)",
                 "Vitamin D3",
@@ -161,29 +177,22 @@
               ]
             },
             {
-              time: "11:00 AM — Meal 2",
-              desc: "With food is usually best for glucosamine + Vascepa (split dose).",
-              checks: [
-                "Meal 2",
-                "Glucosamine (with food)",
-                "Vascepa (part 1 of total daily)"
-              ]
+              time: "11:00 AM — Meal 2 (Feeding 4)",
+              macros: dayMacroSplit.meal2,
+              desc: "Feeding 4 macros steady. With food is usually best for glucosamine + Vascepa (split dose).",
+              checks: ["Meal 2", "Glucosamine (with food)", "Vascepa (part 1 of total daily)"]
             },
             {
-              time: "2:30 PM — Meal 3",
-              desc: "Steady energy. Take fenofibrate with food if your label says so.",
-              checks: [
-                "Meal 3",
-                "Fenofibrate 145 mg (per label)"
-              ]
+              time: "2:30 PM — Meal 3 (Feeding 5)",
+              macros: dayMacroSplit.meal3,
+              desc: "Feeding 5 macros moderate carbs so you don’t crash. Fenofibrate with food if your label says so.",
+              checks: ["Meal 3", "Fenofibrate 145 mg (per label)"]
             },
             {
-              time: "5:45 PM — Final Meal",
-              desc: "Early final meal = better sleep. Finish Vascepa daily total if splitting.",
-              checks: [
-                "Final meal",
-                "Vascepa (remainder to reach 4 g/day total)"
-              ]
+              time: "5:45 PM — Final Meal (Feeding 6)",
+              macros: dayMacroSplit.final,
+              desc: "Feeding 6 macros: early final meal = better sleep. Finish Vascepa daily total if splitting.",
+              checks: ["Final meal", "Vascepa (remainder to reach 4 g/day total)"]
             }
           ]
         },
@@ -193,37 +202,27 @@
             {
               time: "6:45 PM",
               desc: "Atorvastatin is commonly taken in the evening (follow your label).",
-              checks: [
-                "Atorvastatin 40 mg"
-              ]
+              checks: ["Atorvastatin 40 mg"]
             },
             {
               time: "7:00 PM",
               desc: "Magnesium before bed for relaxation/sleep quality.",
-              checks: [
-                "Magnesium (bisglycinate)"
-              ]
+              checks: ["Magnesium (bisglycinate)"]
             },
             {
               time: "7:05 PM",
               desc: "If you run peptides pre-bed, keep timing consistent.",
-              checks: [
-                "Peptide stack (optional)"
-              ]
+              checks: ["Peptide stack (optional)"]
             },
             {
               time: "7:10 PM",
-              desc: "Casein is optional pre-bed. If it makes you too full, move earlier.",
-              checks: [
-                "Casein (optional)"
-              ]
+              desc: "Casein optional pre-bed. If used, treat it as a swap (reduce protein earlier so daily total stays on target).",
+              checks: ["Casein (optional)"]
             },
             {
               time: "7:30 PM",
               desc: "Lights out.",
-              checks: [
-                "Sleep"
-              ]
+              checks: ["Sleep"]
             }
           ]
         }
@@ -233,40 +232,36 @@
     nightshift: {
       title: "Nightshift",
       times: "Placeholder (edit later)",
-      sections: [
-        {
-          title: "Nightshift (placeholder)",
-          blocks: [
-            {
-              time: "—",
-              desc: "Paste your nightshift schedule here later and I’ll format it the same.",
-              checks: ["Nightshift plan stays as placeholder for now"]
-            }
-          ]
-        }
-      ]
+      targets: dailyTargets,
+      macroNote: "",
+      sections: [{
+        title: "Nightshift (placeholder)",
+        blocks: [{
+          time: "—",
+          desc: "Paste your nightshift schedule later and I’ll match this same macro-per-feeding setup.",
+          checks: ["Nightshift plan placeholder"]
+        }]
+      }]
     },
 
     offday: {
       title: "Off Day",
       times: "Placeholder (edit later)",
-      sections: [
-        {
-          title: "Off Day (placeholder)",
-          blocks: [
-            {
-              time: "—",
-              desc: "Add your lower-cal off-day structure here later.",
-              checks: ["Off day plan stays as placeholder for now"]
-            }
-          ]
-        }
-      ]
+      targets: dailyTargets,
+      macroNote: "",
+      sections: [{
+        title: "Off Day (placeholder)",
+        blocks: [{
+          time: "—",
+          desc: "Add your lower-cal off-day structure later and I’ll assign the best macro timing for that day too.",
+          checks: ["Off day plan placeholder"]
+        }]
+      }]
     }
   };
 
   // ----------------- STATE (SAVES DAILY) -----------------
-  const STORAGE_KEY = "cutcontrol_reset_v1";
+  const STORAGE_KEY = "cutcontrol_reset_v2_macros";
   const TODAY = new Date().toISOString().slice(0,10); // YYYY-MM-DD
   let state = load();
 
@@ -307,16 +302,31 @@
 
   function render(){
     const plan = plans[state.mode];
+
     document.getElementById("modePill").textContent = "Mode: " + plan.title;
     document.getElementById("timesPill").textContent = plan.times;
+
+    // Show targets + computed kcal from macros (clarity)
+    const computed = kcalFromMacros(plan.targets.p, plan.targets.c, plan.targets.f);
+    document.getElementById("targetPill").textContent =
+      `Targets: ${plan.targets.kcal} kcal • ${plan.targets.p}P / ${plan.targets.f}F / ${plan.targets.c}C (macro kcal ≈ ${computed})`;
 
     const root = document.getElementById("content");
     root.innerHTML = "";
 
+    // Add a quick note card for dayshift only (so you remember the 1900 vs macro math)
+    if(state.mode === "dayshift" && plan.macroNote){
+      const noteCard = document.createElement("div");
+      noteCard.className = "card";
+      noteCard.innerHTML = `<h2>Macro Note</h2>
+        <div class="desc">${escapeHtml(plan.macroNote)}</div>`;
+      root.appendChild(noteCard);
+    }
+
     plan.sections.forEach((sec, sIdx)=>{
       const card = document.createElement("div");
       card.className = "card";
-      card.innerHTML = `<h2>${sec.title}</h2>`;
+      card.innerHTML = `<h2>${escapeHtml(sec.title)}</h2>`;
 
       sec.blocks.forEach((blk, bIdx)=>{
         const block = document.createElement("div");
@@ -324,7 +334,29 @@
 
         const head = document.createElement("div");
         head.className = "time";
-        head.innerHTML = `<span>${blk.time}</span><span class="tiny">${plan.title}</span>`;
+
+        const right = document.createElement("div");
+        right.className = "rightMini";
+
+        if(blk.macros){
+          const t = document.createElement("span");
+          t.className = "tag accent";
+          t.textContent = macroText(blk.macros);
+          right.appendChild(t);
+
+          const k = document.createElement("span");
+          k.className = "tag";
+          k.textContent = `${kcalFromMacros(blk.macros.p, blk.macros.c, blk.macros.f)} kcal`;
+          right.appendChild(k);
+        }
+
+        const modeTag = document.createElement("span");
+        modeTag.className = "tag";
+        modeTag.textContent = plan.title;
+        right.appendChild(modeTag);
+
+        head.innerHTML = `<span>${escapeHtml(blk.time)}</span>`;
+        head.appendChild(right);
         block.appendChild(head);
 
         const desc = document.createElement("div");
